@@ -1,7 +1,9 @@
 Reproducible Research Peer Assessment 1
 =========================================
-First, we will load and preprocess the "Fitbit" data
+First, we will read in the data set from the local computer for processing the data
+which we will call "FitBit"
 ```{r FitBitdataframe}
+setwd("/Users/lfree61/Desktop/Reproducible Research")
 FitBit<- (data.frame(read.csv("activity.csv", na.strings= "NA")))
 FitBit1<- subset(FitBit, complete.cases(FitBit))
 FitBit1<- transform(FitBit1, interval= factor(interval))
