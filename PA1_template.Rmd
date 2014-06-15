@@ -26,6 +26,10 @@ mean(StepsperDay)
 median(StepsperDay)
 ```
 
+Mean steps per day is 9354.23
+Median number of steps per day is 10395
+
+
 From this we learn the avg pattern of activity per day, using a time series plot: 
 ```{r plotFitBit1}
 StepsperInterval <- split(FitBit1$steps, FitBit1$interval)
@@ -42,11 +46,15 @@ dev.off()
 levels(FitBit1$interval)[which.max(AvgStepsperInterval)]
 ```
 
+The five minute interval that contains the max number of steps is: 835
+
 How many missing values are in this data set?
 ```{r missing vals}
 sum(!complete.cases(FitBit))
 
-## Strategy-- input missing value by filling datetime's with mean for that interval over all days where "FitBit2" is the new data set with the filled data
+## Strategy for filling missing data--- 
+input missing value by filling datetime's with mean for that interval over all days 
+where "FitBit2" is the new data set with the filled data
 ```{r}
 FitBit2<- FitBit
 emptyvalues<-  FitBit2[!complete.cases(fillData), 3]
