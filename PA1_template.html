@@ -1,0 +1,101 @@
+Reproducible Research Peer Assessment 1
+=========================================
+First, we will read in the data set from the local computer for processing the data
+which we will call "FitBit"
+```{r FitBitdataframe}
+setwd("/Users/lfree61/Desktop/Reproducible Research")
+FitBit<- (data.frame(read.csv("activity.csv", na.strings= "NA")))
+FitBit1<- subset(FitBit, complete.cases(FitBit))
+FitBit1<- transform(FitBit1, interval= factor(interval))
+```
+
+Next we will find the total number of steps per day and create a histogram: 
+
+```{r histFitBit}
+DateofSteps<- split(FitBit1$steps, FitBit1$date)
+StepsperDay<- sapply(DateofSteps, sum)
+
+hist(StepsperDay, breaks=10)
+dev.copy(png, file= "figures\\hist_StepsperDay.png")
+dev.off()
+```
+
+Learn the mean and median number of setps taken each day: 
+```{r meanFitBit}
+mean(StepsperDay)
+median(StepsperDay)
+```
+
+From this we learn the avg pattern of activity per day, using a time series plot: 
+```{r plotFitBit1}
+StepsperInterval <- split(FitBit1$steps, FitBit1$interval)
+AvgStepsperInterval<- sapply(StepsperInterval, mean)
+plot(AvgStepsperInterval ~ levels(FitBit1$interval), 
+  type= "1",
+  xlab= "5 minute intervals",
+  ylab= "Average number of Steps")
+dev.copy(png, file = "figures\\seriesplotAvgStepsperInterval.png")
+dev.off()
+```##Now, let's determine which 5-min interval contains the maximum number of steps: 
+## Determining the 5-min interval with the max steps
+```{r maxStepsperInterval}
+levels(FitBit1$interval)[which.max(AvgStepsperInterval)]
+```
+
+How many missing values are in this data set?
+```{r missing vals}
+sum(!complete.cases(FitBit))
+
+## Strategy-- input missing value by filling datetime's with mean for that interval over all days where "FitBit2" is the new data set with the filled data
+```{r}
+FitBit2<- FitBit
+emptyvalues<-  FitBit2[!complete.cases(fillData), 3]
+availableintervals<-  as.numeric(names(AvgStepsperInterval))
+FitBit2[!complete.cases(FitBit2), 1] = 
+    AvgStepsperInterval[match(emptyvalues, availableintervals)]
+```
+## Create Histogram of new data set and report mean/median for total steps/day
+```{r histofFitBit2}
+DateofSteps<- split(FitBit2$steps, FitBit2$date)
+StepsperDay<- sapply(DateofSteps, sum)
+hist(StepsperDay, breaks=10)
+dev.copy(png, file="figures\\histFitBit2.png")
+dev.off()
+
+## Report mean and median of Steps per day
+mean(StepsperDay)
+median(StepsperDay)
+
+##Answer--As the missing values were no longer excluded, but instead filled with the new data values, the resulting values were different from FitBit2 from the first part of the assignment. 
+```
+
+What are the differences in activity patterns between weekdays and weekends?
+```{r}
+alldayswalked <- weekdays(as.Data(FitBit2$date))
+weekeends<- (alldayswalked== "Saturday") | (alldayswalked == "Sunday")
+alldayswalked[weekends] = "weekend"
+alldayswalked[!weekends]= "weekday"
+alldayswalked<- factor(alldayswalked, levels c("weekday", "weekend"))
+
+FitBit2$date = alldayswalked
+weekend<- subset(FitBit2, FitBit2$date =="weekend")
+weekday<- subset(FitBit2, FitBit2$date == "weekday")
+Avgsforweekend<- sapply(split(weekend$steps, weekend$interval), mean)
+Avgsforweekday<- sapply(split(weekday$steps, weekday$interval), mean)
+```
+Let's look at a time series plot for the averages across all weekdays/weekends. 
+```{r plotavgsalldayswalked}
+par(mfrow = c(2, 1))
+plot(Avgsforweekend ~ levels(FitBit1$interval),
+     type="1",
+     main="Weekend",
+     xlab= "Time per day (5 min intervals)",
+     ylab= "Avg number of steps")
+plot(Avgsforweekday ~ levels(FitBit1$interval), 
+      type="1", 
+      main="Weekday",
+      xlab= "Time per day(5 min intervals)", 
+      ylab= "Avg number of steps")
+dev.copy(png, file= "figures\\seriesplotFitBit2.png")
+dev.off()
+```
